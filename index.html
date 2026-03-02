@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Agenda Micaelle - 2026</title>
+    <style>
+        :root { --p: #4f46e5; --bg: #f8fafc; --txt: #1e293b; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--txt); display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .calendar-card { width: 100%; max-width: 900px; background: white; border-radius: 15px; shadow: 0 10px 30px rgba(0,0,0,0.1); overflow: hidden; border: 1px solid #e2e8f0; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 20px; background: white; }
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        th { background: #f1f5f9; padding: 12px; font-size: 0.8rem; color: #64748b; }
+        td { border: 1px solid #f1f5f9; height: 110px; vertical-align: top; padding: 8px; cursor: pointer; position: relative; }
+        td:hover { background: #fdfdff; }
+        .day-num { font-weight: 700; font-size: 0.9rem; margin-bottom: 5px; color: #94a3b8; }
+        .event-tag { font-size: 0.7rem; background: #eef2ff; color: #4338ca; padding: 4px 6px; border-radius: 4px; margin-top: 4px; border-left: 3px solid #4f46e5; }
+        
+        /* Modal */
+        .modal-bg { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.4); display:none; justify-content:center; align-items:center; z-index:10; }
+        .modal { background: white; padding: 25px; border-radius: 12px; width: 320px; box-shadow: 0 20px 25px rgba(0,0,0,0.2); }
+        select, button { width: 100%; padding: 12px; margin-top: 10px; border-radius: 8px; border: 1px solid #ddd; }
+        .btn-save { background: var(--p); color: white; border: none; font-weight: bold; cursor: pointer; }
+        .btn-del { background: #fee2e2; color: #ef4444; border: none; margin-top: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="calendar-card">
+        <div class="header">
+            <button onclick="changeMonth(-1)" style="width:auto">❮</button>
+            <h2 id="monthYear" style="margin:0"></h2>
+            <button onclick="changeMonth(1)" style="width:auto">❯</button>
+        </div>
+        <table id="calendar">
+            <thead><tr><th>Dom</th><th>Seg</th><th>Ter</th><th>Qua</th><th>Qui</th><th>Sex</th><th>Sáb</th></tr></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <div class="modal-bg" id="modal">
+        <div class="modal">
+            <h3 id="modalDate" style="margin-top:0">Editar Dia</h3>
+            <label>Instrutora:</label>
+            <select id="nome">
+                <option value="Beatriz">Beatriz</option>
+                <option value="Letícia">Letícia</option>
+                <option value="Micaelle">Micaelle</option>
+            </select>
+            <label>Disciplina:</label>
+            <select id="materia">
+                <option value="Química">Química</option>
+                <option value="Biologia">Biologia</option>
+            </select>
+            <button class="btn-save" onclick="salvar()">Salvar Atualização</button>
+            <button class="btn-del" onclick="deletar()">Limpar Dia</button>
+            <button onclick="fechar()" style="background:none; border:none; color:gray; cursor:pointer">Fechar</button>
+        </div>
+    </div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+    import { getFirestore, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+    // SUBSTITUA PELOS SEUS DADOS QUE APARECEREM NO FIREBASE
+    const firebaseConfig = {
+        apiKey: "COLE_AQUI_SUA_API_KEY",
+        authDomain: "micaelle-a7db4.firebaseapp.com",
+        projectId: "micaelle-a7db4",
+        storageBucket: "micaelle-a7db4.appspot.com",
+        messagingSenderId: "492446136480",
+        appId: "COLE_AQUI_SEU_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    let date = new Date();
+    let currentId = "";
+
+    window.render = async () => {
+        const m = date.getMonth(), y = date.getFullYear();
+        document.getElementById("monthYear").innerText = date.toLocaleString("pt-BR", {month:"long", year:"numeric"});
+        
+        const first = new Date(y, m, 1).getDay();
+        const last = new Date(y, m + 1, 0).getDate();
+        const tbody = document.querySelector("#calendar tbody");
+        tbody.innerHTML = "";
+
+        let row = document.createElement("tr");
+        for(let i=0; i<first; i++) row.appendChild(document.createElement("td"));
+
+        for(let d=1; d<=last; d++) {
+            if((first+d-1)%7===0 && d!==1) { tbody.appendChild(row); row = document.createElement("tr"); }
+            const cell = document.createElement("td");
+            const id = `${y}-${m+1}-${d}`;
+            cell.innerHTML = `<div class="day-num">${d}</div><div id="c-${id}"></div>`;
+            cell.onclick = () => open(id, d);
+            row.appendChild(cell);
+            load(id);
+        }
+        tbody.appendChild(row);
+    }
+
+    async function load(id) {
+        const s = await getDoc(doc(db, "agenda", id));
+        if(s.exists()) {
+            document.getElementById(`c-${id}`).innerHTML = `<div class="event-tag">${s.data().n}</div><div class="event-tag" style="background:#f0fdf4; color:#166534; border-color:#22c55e">${s.data().m}</div>`;
+        }
+    }
+
+    window.open = async (id, d) => {
+        currentId = id;
+        document.getElementById("modalDate").innerText = `Dia ${d}`;
+        const s = await getDoc(doc(db, "agenda", id));
+        if(s.exists()){
+            document.getElementById("nome").value = s.data().n;
+            document.getElementById("materia").value = s.data().m;
+        }
+        document.getElementById("modal").style.display = "flex";
+    }
+
+    window.salvar = async () => {
+        await setDoc(doc(db, "agenda", currentId), {
+            n: document.getElementById("nome").value,
+            m: document.getElementById("materia").value
+        });
+        fechar(); render();
+    }
+
+    window.deletar = async () => {
+        if(confirm("Deseja limpar este dia?")) {
+            await deleteDoc(doc(db, "agenda", currentId));
+            fechar(); render();
+        }
+    }
+
+    window.fechar = () => document.getElementById("modal").style.display = "none";
+    window.changeMonth = (v) => { date.setMonth(date.getMonth()+v); render(); }
+
+    render();
+</script>
+</body>
+</html>
