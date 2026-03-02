@@ -2,41 +2,47 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Agenda Micaelle - 2026</title>
+    <title>Agenda Laboratórios - Multi-Agendamento</title>
     <style>
         :root { --p: #4f46e5; --bg: #f8fafc; --txt: #1e293b; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--txt); display: flex; flex-direction: column; align-items: center; padding: 20px; }
-        .calendar-card { width: 100%; max-width: 900px; background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); overflow: hidden; border: 1px solid #e2e8f0; }
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 20px; background: white; }
+        .calendar-card { width: 100%; max-width: 1100px; background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); overflow: hidden; border: 1px solid #e2e8f0; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 20px; }
         table { width: 100%; border-collapse: collapse; table-layout: fixed; }
         th { background: #f1f5f9; padding: 12px; font-size: 0.8rem; color: #64748b; }
-        td { border: 1px solid #f1f5f9; height: 130px; vertical-align: top; padding: 8px; cursor: pointer; position: relative; }
+        td { border: 1px solid #f1f5f9; height: 160px; vertical-align: top; padding: 5px; cursor: pointer; transition: 0.2s; overflow-y: auto; }
         td:hover { background: #fdfdff; }
-        .day-num { font-weight: 700; font-size: 0.9rem; margin-bottom: 5px; color: #94a3b8; }
+        .day-num { font-weight: 700; font-size: 0.9rem; color: #94a3b8; margin: 5px; }
         
-        /* Tags no Calendário */
-        .event-tag { font-size: 0.7rem; background: #eef2ff; color: #4338ca; padding: 3px 6px; border-radius: 4px; margin-top: 3px; border-left: 3px solid #4f46e5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .time-tag { font-size: 0.65rem; color: #64748b; font-weight: bold; margin-top: 2px; display: block; }
+        /* Estilo dos Cards de Agendamento no Calendário */
+        .reserva-item { 
+            font-size: 0.65rem; background: #fff; border: 1px solid #e2e8f0; 
+            border-left: 3px solid var(--p); border-radius: 4px; padding: 4px; 
+            margin-bottom: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .reserva-item strong { display: block; color: var(--p); }
 
         /* Modal */
-        .modal-bg { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.4); display:none; justify-content:center; align-items:center; z-index:10; }
-        .modal { background: white; padding: 25px; border-radius: 12px; width: 320px; box-shadow: 0 20px 25px rgba(0,0,0,0.2); }
-        .modal label { font-size: 0.85rem; font-weight: 600; color: #475569; display: block; margin-top: 10px; }
+        .modal-bg { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); display:none; justify-content:center; align-items:center; z-index:100; }
+        .modal { background: white; padding: 25px; border-radius: 12px; width: 380px; max-height: 90vh; overflow-y: auto; }
+        .lista-existente { margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
+        .item-lista { display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; background: #f8fafc; padding: 8px; margin-bottom: 5px; border-radius: 6px; }
+        
+        label { font-size: 0.8rem; font-weight: bold; display: block; margin-top: 10px; }
         select, input, button { width: 100%; padding: 10px; margin-top: 5px; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; }
-        .time-group { display: flex; gap: 10px; }
-        .btn-save { background: var(--p); color: white; border: none; font-weight: bold; cursor: pointer; margin-top: 20px; }
-        .btn-del { background: #fee2e2; color: #ef4444; border: none; margin-top: 8px; cursor: pointer; }
+        .btn-add { background: var(--p); color: white; border: none; cursor: pointer; font-weight: bold; margin-top: 15px; }
+        .btn-cancel { background: none; border: none; color: #64748b; cursor: pointer; margin-top: 10px; }
+        .btn-del-small { background: #fee2e2; color: #ef4444; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.7rem; }
 
-        .header-main { text-align: center; margin-bottom: 30px; }
-        .age { font-size: 2.2rem; font-weight: 800; color: #1e293b; letter-spacing: -1px; text-transform: uppercase; background: linear-gradient(to right, #4f46e5, #9333ea); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 5px; }
-        .subtitle { color: #64748b; font-size: 1rem; margin: 0; font-weight: 400; }
+        .header-main { text-align: center; margin-bottom: 20px; }
+        .age { font-size: 2rem; font-weight: 800; background: linear-gradient(to right, #4f46e5, #9333ea); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     </style>
 </head>
 <body>
 
 <div class="header-main">
     <div class="age">Agendamento Laboratórios</div>
-    <p class="subtitle">Gestão de Disciplinas e Instrutoras 2026</p>
+    <p style="color: #64748b;">Múltiplos agendamentos por dia permitidos</p>
 </div>
 
 <div class="calendar-card">
@@ -53,61 +59,55 @@
 
 <div class="modal-bg" id="modal">
     <div class="modal">
-        <h3 id="modalDate" style="margin-top:0">Editar Dia</h3>
+        <h3 id="modalDate">Agendamentos</h3>
         
-        <label>Instrutora:</label>
-        <select id="nome">
-            <option value="Beatriz">Beatriz</option>
-            <option value="Letícia">Letícia</option>
-            <option value="Micaelle">Micaelle</option>
-        </select>
-
-        <label>Disciplina:</label>
-        <select id="materia">
-            <option value="Química">Química</option>
-            <option value="Biologia">Biologia</option>
-        </select>
-
-        <div class="time-group">
-            <div style="flex:1">
-                <label>Início:</label>
-                <input type="time" id="horaInicio">
+        <div id="listaReservas" class="lista-existente">
             </div>
-            <div style="flex:1">
-                <label>Fim:</label>
-                <input type="time" id="horaFim">
+
+        <div style="background: #f1f5f9; padding: 15px; border-radius: 10px;">
+            <strong style="font-size: 0.9rem;">Novo Agendamento</strong>
+            <label>Instrutora:</label>
+            <select id="nome">
+                <option value="Beatriz">Beatriz</option>
+                <option value="Letícia">Letícia</option>
+                <option value="Micaelle">Micaelle</option>
+            </select>
+            <label>Disciplina:</label>
+            <select id="materia">
+                <option value="Química">Química</option>
+                <option value="Biologia">Biologia</option>
+            </select>
+            <div style="display:flex; gap:10px">
+                <div style="flex:1"><label>Início:</label><input type="time" id="hI"></div>
+                <div style="flex:1"><label>Fim:</label><input type="time" id="hF"></div>
             </div>
+            <button class="btn-add" onclick="salvarNovo()">Adicionar à Agenda</button>
         </div>
-
-        <button class="btn-save" onclick="salvar()">Salvar Atualização</button>
-        <button class="btn-del" onclick="deletar()">Limpar Dia</button>
-        <button onclick="fechar()" style="background:none; border:none; color:gray; cursor:pointer; font-size: 0.9rem;">Fechar sem salvar</button>
+        <button class="btn-cancel" onclick="fechar()">Fechar</button>
     </div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-    import { getFirestore, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
     const firebaseConfig = {
-        apiKey: "AIza" + "SyCr-Pj_DLHt61l2FfVOXuUpCOJIAw2ORHs", 
+        apiKey: "AIza" + "SyCr-Pj_DLHt61l2FfVOXuUpCOJIAw2ORHs",
         authDomain: "micaelle-a7db4.firebaseapp.com",
         projectId: "micaelle-a7db4",
         storageBucket: "micaelle-a7db4.appspot.com",
         messagingSenderId: "492446136480",
-        appId: "1:492446136480:web:SEU_ID" // Lembre de colocar seu App ID real aqui
+        appId: "1:492446136480:web:SEU_ID"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-
     let date = new Date();
-    let currentId = "";
+    let currentDayId = "";
 
     window.render = async () => {
         const m = date.getMonth(), y = date.getFullYear();
         document.getElementById("monthYear").innerText = date.toLocaleString("pt-BR", {month:"long", year:"numeric"});
-        
         const first = new Date(y, m, 1).getDay();
         const last = new Date(y, m + 1, 0).getDate();
         const tbody = document.querySelector("#calendar tbody");
@@ -118,61 +118,77 @@
 
         for(let d=1; d<=last; d++) {
             if((first+d-1)%7===0 && d!==1) { tbody.appendChild(row); row = document.createElement("tr"); }
-            const cell = document.createElement("td");
             const id = `${y}-${m+1}-${d}`;
+            const cell = document.createElement("td");
             cell.innerHTML = `<div class="day-num">${d}</div><div id="c-${id}"></div>`;
-            cell.onclick = () => open(id, d);
+            cell.onclick = () => openModal(id, d);
             row.appendChild(cell);
-            load(id);
+            loadReservas(id);
         }
         tbody.appendChild(row);
     }
 
-    async function load(id) {
-        const s = await getDoc(doc(db, "agenda", id));
-        if(s.exists()) {
-            const data = s.data();
-            const container = document.getElementById(`c-${id}`);
-            container.innerHTML = `
-                <span class="time-tag">🕒 ${data.hI || '--:--'} às ${data.hF || '--:--'}</span>
-                <div class="event-tag">${data.n}</div>
-                <div class="event-tag" style="background:#f0fdf4; color:#166534; border-color:#22c55e">${data.m}</div>
-            `;
+    async function loadReservas(dayId) {
+        const q = query(collection(db, "agenda", dayId, "reservas"), orderBy("hI"));
+        const snap = await getDocs(q);
+        const container = document.getElementById(`c-${dayId}`);
+        if(container) {
+            container.innerHTML = "";
+            snap.forEach(res => {
+                const d = res.data();
+                container.innerHTML += `
+                    <div class="reserva-item">
+                        <strong>${d.hI} - ${d.hF}</strong>
+                        ${d.n} (${d.m})
+                    </div>`;
+            });
         }
     }
 
-    window.open = async (id, d) => {
-        currentId = id;
-        document.getElementById("modalDate").innerText = `Dia ${d}`;
-        
-        // Reset campos
-        document.getElementById("horaInicio").value = "";
-        document.getElementById("horaFim").value = "";
-
-        const s = await getDoc(doc(db, "agenda", id));
-        if(s.exists()){
-            document.getElementById("nome").value = s.data().n;
-            document.getElementById("materia").value = s.data().m;
-            document.getElementById("horaInicio").value = s.data().hI || "";
-            document.getElementById("horaFim").value = s.data().hF || "";
-        }
+    window.openModal = async (id, d) => {
+        currentDayId = id;
+        document.getElementById("modalDate").innerText = `Agendamentos - Dia ${d}`;
+        const lista = document.getElementById("listaReservas");
+        lista.innerHTML = "Carregando...";
         document.getElementById("modal").style.display = "flex";
+
+        const q = query(collection(db, "agenda", id, "reservas"), orderBy("hI"));
+        const snap = await getDocs(q);
+        lista.innerHTML = snap.empty ? "<p style='font-size:0.8rem; color:gray'>Nenhum horário marcado.</p>" : "";
+        
+        snap.forEach(res => {
+            const data = res.data();
+            lista.innerHTML += `
+                <div class="item-lista">
+                    <span><b>${data.hI}-${data.hF}</b>: ${data.n}</span>
+                    <button class="btn-del-small" onclick="deletarReserva('${res.id}')">Excluir</button>
+                </div>`;
+        });
     }
 
-    window.salvar = async () => {
-        await setDoc(doc(db, "agenda", currentId), {
+    window.salvarNovo = async () => {
+        const hI = document.getElementById("hI").value;
+        const hF = document.getElementById("hF").value;
+        if(!hI || !hF) return alert("Preencha os horários!");
+
+        await addDoc(collection(db, "agenda", currentDayId, "reservas"), {
             n: document.getElementById("nome").value,
             m: document.getElementById("materia").value,
-            hI: document.getElementById("horaInicio").value,
-            hF: document.getElementById("horaFim").value
+            hI: hI,
+            hF: hF
         });
-        fechar(); render();
+        
+        document.getElementById("hI").value = "";
+        document.getElementById("hF").value = "";
+        openModal(currentDayId, currentDayId.split('-')[2]); // Atualiza lista do modal
+        render(); // Atualiza calendário
     }
 
-    window.deletar = async () => {
-        if(confirm("Deseja limpar este dia?")) {
-            await deleteDoc(doc(db, "agenda", currentId));
-            fechar(); render();
+    window.deletarReserva = async (reservaId) => {
+        if(confirm("Excluir este agendamento?")) {
+            await deleteDoc(doc(db, "agenda", currentDayId, "reservas", reservaId));
+            openModal(currentDayId, currentDayId.split('-')[2]);
+            render();
         }
     }
 
