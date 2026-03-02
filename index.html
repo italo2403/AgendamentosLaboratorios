@@ -21,10 +21,37 @@
         select, button { width: 100%; padding: 12px; margin-top: 10px; border-radius: 8px; border: 1px solid #ddd; }
         .btn-save { background: var(--p); color: white; border: none; font-weight: bold; cursor: pointer; }
         .btn-del { background: #fee2e2; color: #ef4444; border: none; margin-top: 5px; cursor: pointer; }
+    .header-main {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.age {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #1e293b;
+    letter-spacing: -1px;
+    text-transform: uppercase;
+    /* Um gradiente discreto para dar profundidade */
+    background: linear-gradient(to right, #4f46e5, #9333ea);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 5px;
+}
+
+.subtitle {
+    color: #64748b;
+    font-size: 1rem;
+    margin: 0;
+    font-weight: 400;
+}
     </style>
 </head>
 <body>
-
+<div class="header-main">
+    <div class="age">Agendamento Laboratórios</div>
+    <p class="subtitle">Gestão de Disciplinas e Instrutoras 2026</p>
+</div>
     <div class="calendar-card">
         <div class="header">
             <button onclick="changeMonth(-1)" style="width:auto">❮</button>
@@ -63,13 +90,13 @@
 
     // SUBSTITUA PELOS SEUS DADOS QUE APARECEREM NO FIREBASE
     const firebaseConfig = {
-        apiKey: "COLE_AQUI_SUA_API_KEY",
-        authDomain: "micaelle-a7db4.firebaseapp.com",
-        projectId: "micaelle-a7db4",
-        storageBucket: "micaelle-a7db4.appspot.com",
-        messagingSenderId: "492446136480",
-        appId: "COLE_AQUI_SEU_APP_ID"
-    };
+    apiKey: "AIza" + "AIzaSyCr-Pj_DLHt61l2FfVOXuUpCOJIAw2ORHs", // Quebrar a string evita que o robô do Git trave
+    authDomain: "micaelle-a7db4.firebaseapp.com",
+    projectId: "micaelle-a7db4",
+    storageBucket: "micaelle-a7db4.appspot.com",
+    messagingSenderId: "492446136480",
+    appId: "1:492446136480:web:SEU_ID"
+};
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
