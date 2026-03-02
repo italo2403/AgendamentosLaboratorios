@@ -133,19 +133,30 @@
     }
 
     async function loadReservas(dayId) {
-        const q = query(collection(db, "agenda", dayId, "reservas"), orderBy("hI"));
-        const snap = await getDocs(q);
-        const container = document.getElementById(`c-${dayId}`);
-        if(container) {
-            container.innerHTML = "";
-            snap.forEach(res => {
-                const d = res.data();
-                container.innerHTML += `
-                    <div class="reserva-item">
-                        <strong>${d.hI} - ${d.hF}</strong>
-                        ${d.n} (${d.m})
-                    </div>`;
-            });
+        try {
+            const q = query(collection(db, "agenda", dayId, "reservas"), orderBy("hI"));
+            const snap = await getDocs(q);
+            const container = document.getElementById(`c-${dayId}`);
+            
+            if (container) {
+                container.innerHTML = ""; // Limpa o "Carregando" ou lixo anterior
+                
+                if (snap.empty) return; // Se não tem nada, para aqui
+
+                snap.forEach(res => {
+                    const d = res.data();
+                    // Criamos o HTML da reserva com cores diferentes para cada linha
+                    const itemHtml = `
+                        <div class="reserva-item">
+                            <strong style="color: #4f46e5; font-size: 10px;">${d.hI} - ${d.hF}</strong>
+                            <div style="font-weight: bold; color: #1e293b;">${d.n}</div>
+                            <div style="color: #64748b; font-style: italic;">${d.m}</div>
+                        </div>`;
+                    container.insertAdjacentHTML('beforeend', itemHtml);
+                });
+            }
+        } catch (error) {
+            console.error("Erro ao carregar reservas do dia " + dayId, error);
         }
     }
 
