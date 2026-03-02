@@ -170,23 +170,30 @@
         });
     }
 
-    window.salvarNovo = async () => {
-        const hI = document.getElementById("hI").value;
-        const hF = document.getElementById("hF").value;
-        if(!hI || !hF) return alert("Preencha os horários!");
+   window.salvarNovo = async () => {
+    const hI = document.getElementById("hI").value;
+    const hF = document.getElementById("hF").value;
+    if(!hI || !hF) return alert("Preencha os horários!");
 
-        await addDoc(collection(db, "agenda", currentDayId, "reservas"), {
+    try {
+        console.log("Tentando salvar no dia:", currentDayId);
+        const docRef = await addDoc(collection(db, "agenda", currentDayId, "reservas"), {
             n: document.getElementById("nome").value,
             m: document.getElementById("materia").value,
             hI: hI,
             hF: hF
         });
+        console.log("Salvo com sucesso! ID:", docRef.id);
         
         document.getElementById("hI").value = "";
         document.getElementById("hF").value = "";
-        openModal(currentDayId, currentDayId.split('-')[2]); // Atualiza lista do modal
-        render(); // Atualiza calendário
+        openModal(currentDayId, currentDayId.split('-')[2]);
+        render();
+    } catch (e) {
+        console.error("ERRO CRÍTICO AO SALVAR:", e);
+        alert("O banco de dados recusou o salvamento: " + e.message);
     }
+}
 
     window.deletarReserva = async (reservaId) => {
         if(confirm("Excluir este agendamento?")) {
